@@ -30,10 +30,10 @@ public class User {
     @Column(name = "create_date")
     private LocalDate date;
     private long phone;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<BorrowEntity> borrowEntity = new ArrayList<>();
 
 }

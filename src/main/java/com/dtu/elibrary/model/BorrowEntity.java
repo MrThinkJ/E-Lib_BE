@@ -21,7 +21,6 @@ public class BorrowEntity {
     private LocalDate borrowDate;
     private String returnDate;
     private int rate;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
