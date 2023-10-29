@@ -38,5 +38,4 @@ public class Book {
     private Author author;
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BorrowEntity> borrowEntities = new ArrayList<>();
-
 }
