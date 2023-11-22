@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -32,7 +33,7 @@ public class BookServiceImpl implements BookService {
 
         Page<Book> bookPage = bookRepository.findAll(pageable);
         List<Book> bookList = bookPage.getContent();
-        List<BookDto> content = bookList.stream().map(this::mapToDto).toList();
+        List<BookDto> content = bookList.stream().map(this::mapToDto).collect(Collectors.toList());
 
         BookResponse bookResponse = new BookResponse();
         bookResponse.setContent(content);
@@ -52,7 +53,10 @@ public class BookServiceImpl implements BookService {
     }
 
     private BookDto mapToDto(Book book){
-        return mapper.map(book, BookDto.class);
+        BookDto bookDto = mapper.map(book, BookDto.class);
+        bookDto.setAuthorId(book.getAuthor().getAuthor());
+        bookDto.setPublisherId(book.getPublisher().getPublisher());
+        return bookDto;
     }
 
     private Book mapToEntity(BookDto bookDto){

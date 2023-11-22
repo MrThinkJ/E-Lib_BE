@@ -7,6 +7,8 @@ import com.dtu.elibrary.utils.AppConstants;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/book")
 public class BookController {
@@ -22,7 +24,8 @@ public class BookController {
                                                    @RequestParam(value = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
                                                    @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
                                                    @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir){
-        return ResponseEntity.ok(bookService.getAllBook(pageNo, pageSize, sortBy, sortDir));
+        BookResponse bookResponse = bookService.getAllBook(pageNo, pageSize, sortBy, sortDir);
+        return ResponseEntity.ok(bookResponse);
     }
 
     @GetMapping("/{id}")
