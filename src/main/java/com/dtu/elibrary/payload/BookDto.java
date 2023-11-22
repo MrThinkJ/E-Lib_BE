@@ -22,6 +22,6 @@ public class BookDto {
     private String image;
     private LocalDate createDate;
     private LocalDate publishedYear;
-    private Publisher publisher;
-    private Author author;
+    private String publisherId;
+    private String authorId;
 }

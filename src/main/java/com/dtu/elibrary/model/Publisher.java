@@ -1,5 +1,6 @@
 package com.dtu.elibrary.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,5 +21,6 @@ public class Publisher {
     @Id
     private String publisher;
     @OneToMany(mappedBy = "publisher", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("publisher")
     private List<Book> books = new ArrayList<>();
 }
