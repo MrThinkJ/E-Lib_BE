@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,4 +25,5 @@ public class BookDto {
     private LocalDate publishedYear;
     private String publisherId;
     private String authorId;
+    private List<Integer> categoryIds;
 }
