@@ -5,6 +5,7 @@ import com.dtu.elibrary.model.Author;
 import com.dtu.elibrary.model.Book;
 import com.dtu.elibrary.model.Category;
 import com.dtu.elibrary.model.Publisher;
+import com.dtu.elibrary.payload.BookAddDto;
 import com.dtu.elibrary.payload.BookDto;
 import com.dtu.elibrary.payload.BookResponse;
 import com.dtu.elibrary.repository.AuthorRepository;
@@ -12,16 +13,19 @@ import com.dtu.elibrary.repository.BookRepository;
 import com.dtu.elibrary.repository.CategoryRepository;
 import com.dtu.elibrary.repository.PublisherRepository;
 import com.dtu.elibrary.service.BookService;
+import com.dtu.elibrary.service.CloudinaryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +34,20 @@ public class BookServiceImpl implements BookService {
     AuthorRepository authorRepository;
     PublisherRepository publisherRepository;
     CategoryRepository categoryRepository;
+    CloudinaryService cloudinaryService;
     ModelMapper mapper;
 
     public BookServiceImpl(BookRepository bookRepository,
                            AuthorRepository authorRepository,
                            PublisherRepository publisherRepository,
                            CategoryRepository categoryRepository,
+                           CloudinaryService cloudinaryService,
                            ModelMapper mapper) {
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
+        this.cloudinaryService = cloudinaryService;
         this.mapper = mapper;
     }
 
@@ -67,8 +74,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto addNewBook(BookDto bookDto) {
-        Book book = mapToEntity(bookDto);
+    public BookDto addNewBook(BookAddDto bookDto, MultipartFile image) {
+        Book book = mapAddToEntity(bookDto);
         Author author = authorRepository.findById(bookDto.getAuthorId()).orElseThrow(() -> new ResourceNotFoundException("author", "id", bookDto.getAuthorId()));
         book.setAuthor(author);
         Publisher publisher = publisherRepository.findById(bookDto.getPublisherId()).orElseThrow(() -> new ResourceNotFoundException("publisher", "id", bookDto.getPublisherId()));
@@ -77,14 +84,15 @@ public class BookServiceImpl implements BookService {
         book.setBorrowEntities(null);
 
         List<Category> categories = new ArrayList<>();
-        bookDto.getCategoryIds().forEach(categoryId -> categories.add(getCategoryById(categoryId)));
+        for (Integer categoryId : bookDto.getCategoryIds()) {
+            Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("category", "id", String.valueOf(categoryId)));
+            categories.add(category);
+        }
         book.setCategories(categories);
+        Map data = cloudinaryService.upload(image);
+        book.setImage(data.get("url").toString());
         Book newBook = bookRepository.save(book);
         return mapToDto(newBook);
-    }
-
-    private Category getCategoryById(int categoryId){
-        return categoryRepository.findById(categoryId).orElseThrow(() ->new ResourceNotFoundException("Category", "id", String.valueOf(categoryId)));
     }
 
     private BookResponse mapToResponse(Page<Book> bookPage){
@@ -107,5 +115,15 @@ public class BookServiceImpl implements BookService {
 
     private Book mapToEntity(BookDto bookDto){
         return mapper.map(bookDto, Book.class);
+    }
+    private Book mapAddToEntity(BookAddDto bookDto){
+        Book book = new Book();
+        book.setTitle(bookDto.getTitle());
+        book.setPrice(bookDto.getPrice());
+        book.setQuantity(bookDto.getQuantity());
+        book.setDescription(bookDto.getDescription());
+        book.setPublishedYear(bookDto.getPublishedYear());
+        book.setQuantity(bookDto.getQuantity());
+        return book;
     }
 }
