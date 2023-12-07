@@ -15,6 +15,10 @@ import java.util.Optional;
 public class CategoryController {
     CategoryService categoryService;
 
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
+
     @GetMapping()
     public ResponseEntity<List<Category>> getAllCategory(){
         return ResponseEntity.of(Optional.ofNullable(categoryService.getAllCategory()));
