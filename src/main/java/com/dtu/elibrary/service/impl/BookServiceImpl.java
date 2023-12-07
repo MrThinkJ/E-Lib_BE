@@ -3,11 +3,13 @@ package com.dtu.elibrary.service.impl;
 import com.dtu.elibrary.exception.ResourceNotFoundException;
 import com.dtu.elibrary.model.Author;
 import com.dtu.elibrary.model.Book;
+import com.dtu.elibrary.model.Category;
 import com.dtu.elibrary.model.Publisher;
 import com.dtu.elibrary.payload.BookDto;
 import com.dtu.elibrary.payload.BookResponse;
 import com.dtu.elibrary.repository.AuthorRepository;
 import com.dtu.elibrary.repository.BookRepository;
+import com.dtu.elibrary.repository.CategoryRepository;
 import com.dtu.elibrary.repository.PublisherRepository;
 import com.dtu.elibrary.service.BookService;
 import org.modelmapper.ModelMapper;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,15 +29,18 @@ public class BookServiceImpl implements BookService {
     BookRepository bookRepository;
     AuthorRepository authorRepository;
     PublisherRepository publisherRepository;
+    CategoryRepository categoryRepository;
     ModelMapper mapper;
 
     public BookServiceImpl(BookRepository bookRepository,
                            AuthorRepository authorRepository,
                            PublisherRepository publisherRepository,
+                           CategoryRepository categoryRepository,
                            ModelMapper mapper) {
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
         this.bookRepository = bookRepository;
+        this.categoryRepository = categoryRepository;
         this.mapper = mapper;
     }
 
@@ -69,8 +75,16 @@ public class BookServiceImpl implements BookService {
         book.setPublisher(publisher);
         book.setCreateDate(LocalDate.now());
         book.setBorrowEntities(null);
+
+        List<Category> categories = new ArrayList<>();
+        bookDto.getCategoryIds().forEach(categoryId -> categories.add(getCategoryById(categoryId)));
+        book.setCategories(categories);
         Book newBook = bookRepository.save(book);
         return mapToDto(newBook);
+    }
+
+    private Category getCategoryById(int categoryId){
+        return categoryRepository.findById(categoryId).orElseThrow(() ->new ResourceNotFoundException("Category", "id", String.valueOf(categoryId)));
     }
 
     private BookResponse mapToResponse(Page<Book> bookPage){
