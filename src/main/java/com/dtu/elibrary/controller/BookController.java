@@ -1,5 +1,6 @@
 package com.dtu.elibrary.controller;
 
+import com.dtu.elibrary.payload.BookAddDto;
 import com.dtu.elibrary.payload.BookDto;
 import com.dtu.elibrary.payload.BookResponse;
 import com.dtu.elibrary.service.BookService;
@@ -48,7 +49,7 @@ public class BookController {
 
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BookDto> addNewBook(@ModelAttribute("bookDto") BookDto bookDto,
+    public ResponseEntity<BookDto> addNewBook(@ModelAttribute BookAddDto bookDto,
                                               @RequestParam MultipartFile image){
         return new ResponseEntity<>(bookService.addNewBook(bookDto, image), HttpStatus.CREATED);
     }
