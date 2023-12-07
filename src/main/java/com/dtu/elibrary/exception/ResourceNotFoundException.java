@@ -1,6 +1,5 @@
 package com.dtu.elibrary.exception;
 
-import org.modelmapper.internal.bytebuddy.implementation.bind.annotation.Super;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -14,7 +13,7 @@ public class ResourceNotFoundException extends RuntimeException{
         super(String.format("%s not found with %s: %s", resourceName, fieldName, fieldName));
         this.resourceName = resourceName;
         this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
+        this.fieldValue = String.valueOf(fieldValue);
     }
 
     public String getResourceName() {
