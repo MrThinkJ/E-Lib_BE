@@ -3,26 +3,23 @@ package com.dtu.elibrary.controller;
 import com.dtu.elibrary.payload.BookDto;
 import com.dtu.elibrary.payload.BookResponse;
 import com.dtu.elibrary.service.BookService;
-import com.dtu.elibrary.service.CloudinaryService;
 import com.dtu.elibrary.utils.AppConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/book")
 public class BookController {
 
     BookService bookService;
-    CloudinaryService cloudinaryService;
 
-    public BookController(BookService bookService, CloudinaryService cloudinaryService) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
-        this.cloudinaryService = cloudinaryService;
     }
 
     @GetMapping()
@@ -50,43 +47,11 @@ public class BookController {
     }
 
     @PostMapping()
-    public ResponseEntity<BookDto> addNewBook(@RequestBody BookDto bookDto){
-        return new ResponseEntity<>(bookService.addNewBook(bookDto), HttpStatus.CREATED);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> addNewBook(@ModelAttribute("bookDto") BookDto bookDto,
+                                              @RequestParam MultipartFile image){
+        return new ResponseEntity<>(bookService.addNewBook(bookDto, image), HttpStatus.CREATED);
     }
 
-//    @RequestPart("image") MultipartFile file,
-//    @PostMapping()
-//    public ResponseEntity<BookDto> addNewBook(@RequestParam(value = "file") MultipartFile file ,@RequestBody BookDto bookDto){
-//        Map data = this.cloudinaryService.upload(file);
-//        System.out.println(data.get("url").toString());
-//        bookDto.setImage(data.get("url").toString());
-//        return new ResponseEntity<>(bookService.addNewBook(bookDto), HttpStatus.CREATED);
-//    }
-
-
-//    @PostMapping( consumes = { "multipart/form-data" })
-//    public ResponseEntity<BookDto> addNewBook(@RequestParam(value = "file", required = false) MultipartFile file, @RequestPart("bookDto") BookDto bookDto) {
-//        try {
-////            // Validate MultipartFile
-////            if (file.isEmpty()) {
-////                return ResponseEntity.badRequest().body("File is required");
-////            }
-//
-//            // Upload file to Cloudinary
-//            Map<String, String> data = this.cloudinaryService.upload(file);
-//            String imageUrl = data.get("url");
-//
-//            // Set image URL in BookDto
-//            bookDto.setImage(imageUrl);
-//
-//            // Add new book
-//            BookDto savedBook = bookService.addNewBook(bookDto);
-//
-//            return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            // Handle exceptions (e.g., Cloudinary service exception)
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
 }

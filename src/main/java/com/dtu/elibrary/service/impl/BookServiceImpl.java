@@ -12,16 +12,19 @@ import com.dtu.elibrary.repository.BookRepository;
 import com.dtu.elibrary.repository.CategoryRepository;
 import com.dtu.elibrary.repository.PublisherRepository;
 import com.dtu.elibrary.service.BookService;
+import com.dtu.elibrary.service.CloudinaryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +33,20 @@ public class BookServiceImpl implements BookService {
     AuthorRepository authorRepository;
     PublisherRepository publisherRepository;
     CategoryRepository categoryRepository;
+    CloudinaryService cloudinaryService;
     ModelMapper mapper;
 
     public BookServiceImpl(BookRepository bookRepository,
                            AuthorRepository authorRepository,
                            PublisherRepository publisherRepository,
                            CategoryRepository categoryRepository,
+                           CloudinaryService cloudinaryService,
                            ModelMapper mapper) {
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
+        this.cloudinaryService = cloudinaryService;
         this.mapper = mapper;
     }
 
@@ -67,7 +73,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto addNewBook(BookDto bookDto) {
+    public BookDto addNewBook(BookDto bookDto, MultipartFile image) {
         Book book = mapToEntity(bookDto);
         Author author = authorRepository.findById(bookDto.getAuthorId()).orElseThrow(() -> new ResourceNotFoundException("author", "id", bookDto.getAuthorId()));
         book.setAuthor(author);
@@ -79,8 +85,10 @@ public class BookServiceImpl implements BookService {
         List<Category> categories = new ArrayList<>();
         bookDto.getCategoryIds().forEach(categoryId -> categories.add(getCategoryById(categoryId)));
         book.setCategories(categories);
-        Book newBook = bookRepository.save(book);
-        return mapToDto(newBook);
+        Map data = cloudinaryService.upload(image);
+
+//        Book newBook = bookRepository.save(book);
+        return mapToDto(book);
     }
 
     private Category getCategoryById(int categoryId){
