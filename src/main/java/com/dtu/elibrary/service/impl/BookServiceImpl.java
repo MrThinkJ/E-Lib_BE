@@ -74,7 +74,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto addNewBook(BookAddDto bookDto, MultipartFile image) {
+    public BookDto addNewBook(BookAddDto bookDto) {
         Book book = mapAddToEntity(bookDto);
         Author author = authorRepository.findById(bookDto.getAuthorId()).orElseThrow(() -> new ResourceNotFoundException("author", "id", bookDto.getAuthorId()));
         book.setAuthor(author);
@@ -89,6 +89,7 @@ public class BookServiceImpl implements BookService {
             categories.add(category);
         }
         book.setCategories(categories);
+        MultipartFile image = bookDto.getImage();
         Map data = cloudinaryService.upload(image);
         book.setImage(data.get("url").toString());
         Book newBook = bookRepository.save(book);
